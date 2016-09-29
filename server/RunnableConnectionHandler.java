@@ -12,6 +12,7 @@ class RunnableConnectionHandler implements Runnable
 	InputStream byteStream = null;
 	InputStreamReader charStream = null;
 	BufferedReader textStream = null;
+	String clientName = null;
 	/* 
 	OutputStream outByteStream = null;
 	OutputStream
@@ -27,7 +28,7 @@ class RunnableConnectionHandler implements Runnable
 			textStream = new BufferedReader(charStream);
 		} catch (IOException e)
 		{
-			this.deleteItSelf();
+			this.closeConnection();
 			throw e;
 		}
 		
@@ -40,18 +41,42 @@ class RunnableConnectionHandler implements Runnable
 			String message;
 			while((message=textStream.readLine())!=null)
 			{		
-				System.out.println("Message from client: " + message);
+				System.out.println("Message from " + getClientName() +": "+ message);
 			}
-		} catch(IOException e) {e.printStackTrace(); this.deleteItSelf();}
+		} catch(IOException e) 
+		{
+			if(socket.isClosed())
+				System.out.println("Connection with client "+ getClientName() + " is closed.");
+			else
+			{
+				e.printStackTrace(); this.closeConnection();
+			}
+		}
 	}
 	
-	void synchronized deleteItSelf() 
+	synchronized void closeConnection() 
 	{
+		System.out.println("RunnableConectionHandler closeConnection() entry: line 59");
 		try
 		{
 			if (socket!=null && !socket.isClosed())	
 				socket.close();
-		} catch(IOException e) {e.printStackTrace();}
+		}
+	       	catch(IOException e) 
+		{
+			System.out.println("RunnableConnectionHandler closeConnection() exception"); 
+			e.printStackTrace();
+		}
+
 	}
-	
+	public String getClientName()
+	{
+		if (clientName!=null)
+			return clientName;
+		else return "null";
+	}
+	public void setClientName(String name)
+	{
+		clientName = name;
+	}
 }

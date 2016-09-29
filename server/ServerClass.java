@@ -13,13 +13,12 @@ public class ServerClass
 
 	public static void main(String [] args)
 	{
-		
+		UtilClass utilities = new UtilClass();
 		Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
             try {
                 Thread.sleep(200);
-                System.out.println("Shouting down ...");
-                releaseResourses();
+		utilities.stopServer("JVM shouting down...");
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -27,7 +26,6 @@ public class ServerClass
         }
 		});
 		
-		UtilClass utilities = new UtilClass();
 		(new Thread(utilities)).start();
 
 		/*
@@ -41,7 +39,8 @@ public class ServerClass
 				clientSocket = serverSocket.accept();
 				if(exitFlag==true)
 					{
-						System.out.println("ServerClass ending it's work.");
+						releaseResourses();
+						System.out.println("ServerClass main loop breaked;");
 						break;
 					}
 
@@ -53,24 +52,30 @@ public class ServerClass
 		
 		catch (IOException e)
 		{
+			utilities.stopServer("Exception in ServerClass main loop!");
 			e.printStackTrace();
-		}
-		finally
-		{
-			releaseResourses();
 		}
 	}
 	
 	
 	static public synchronized void releaseResourses()
 	{
-		try {if(serverSocket!=null && !serverSocket.isClosed()) serverSocket.close();}
+			try 
+			{if(serverSocket!=null && !serverSocket.isClosed()) 
+				{
+					System.out.println("ServerSocket closing");
+					serverSocket.close();
+				}
+			}
 			catch(IOException e) {e.printStackTrace();}
 			try
 			{
+				//System.out.println("now Runnable closing");
 				for(RunnableConnectionHandler connectionIterator : connections)
 				{
-					connectionIterator.deleteItSelf();
+					System.out.println("RunnableConnectionHandler closing with name '"+connectionIterator.getClientName()+"'.");
+
+					connectionIterator.closeConnection();
 				}	
 			} 
 			catch(Exception e)
