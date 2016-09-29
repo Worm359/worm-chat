@@ -54,13 +54,19 @@ class RunnableConnectionHandler implements Runnable
 		}
 	}
 	
-	synchronized void closeConnection() 
+	void closeConnection() 
 	{
-		System.out.println("RunnableConectionHandler closeConnection() entry: line 59");
+		System.out.println("RunnableConectionHandler closeConnection() entry;");
 		try
 		{
-			if (socket!=null && !socket.isClosed())	
-				socket.close();
+			synchronized(socket)
+			{
+				if (socket!=null && !socket.isClosed())	
+							socket.close();
+
+			}
+		//	if (socket!=null && !socket.isClosed())	
+		//		socket.close();
 		}
 	       	catch(IOException e) 
 		{
