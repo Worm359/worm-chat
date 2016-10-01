@@ -78,10 +78,10 @@ public class ServerClass
 					connectionIterator.closeConnection();
 				}	
 			} 
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+			//catch(Exception e)
+			//{
+			//	e.printStackTrace();
+			//}
 			
 	}
 }

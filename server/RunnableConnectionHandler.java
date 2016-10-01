@@ -34,7 +34,7 @@ class RunnableConnectionHandler implements Runnable
 		
 	}
 		
-	public synchronized void run()
+	public void run()
 	{
 		try
 		{
@@ -54,17 +54,13 @@ class RunnableConnectionHandler implements Runnable
 		}
 	}
 	
-	void closeConnection() 
+	synchronized void closeConnection() 
 	{
-		System.out.println("RunnableConectionHandler closeConnection() entry;");
 		try
 		{
-			synchronized(socket)
-			{
 				if (socket!=null && !socket.isClosed())	
 							socket.close();
 
-			}
 		//	if (socket!=null && !socket.isClosed())	
 		//		socket.close();
 		}
