@@ -57,7 +57,22 @@ public class ServerClass
 		}
 	}
 	
+	static public void sendMessage(RunnableConnectionHandler sender, String message)
+	{
+		for(RunnableConnectionHandler connectionIterator : connections)
+		{
+			if(connectionIterator!=sender)
+			{
+				connectionIterator.sendMessageToClient(String message);
+			}
+		}	
 	
+	}
+	static public void removeClient(RunnableConnectionHandler client)
+	{
+		connections.remove(client);
+	}
+
 	static public synchronized void releaseResourses()
 	{
 			try 
