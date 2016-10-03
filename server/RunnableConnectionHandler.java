@@ -5,13 +5,14 @@ import java.net.*;
 import java.util.*;
 import utilities.UtilClass;
 
-
 class RunnableConnectionHandler implements Runnable
 {
 	Socket socket = null;
 	InputStream byteStream = null;
 	InputStreamReader charStream = null;
 	BufferedReader textStream = null;
+	//OutputStream outputByteStream = null;
+	PrintWriter messenger = null; 
 	String clientName = null;
 	/* 
 	OutputStream outByteStream = null;
@@ -26,9 +27,11 @@ class RunnableConnectionHandler implements Runnable
 			byteStream = socket.getInputStream();
 			charStream = new InputStreamReader(byteStream);
 			textStream = new BufferedReader(charStream);
+
+			messenger = new PrintWriter(socket.getOutputStream());
 		} catch (IOException e)
 		{
-			this.closeConnection();
+			this.closeConnection("failed to create instance of RunnableConnectionHandler");
 			throw e;
 		}
 		
@@ -36,28 +39,50 @@ class RunnableConnectionHandler implements Runnable
 		
 	public void run()
 	{
+		//read lines from client
 		try
 		{
 			String message;
 			while((message=textStream.readLine())!=null)
 			{		
-				System.out.println("Message from " + getClientName() +": "+ message);
+				System.out.println(getClientName() +": "+ message);
+				ServerClass.sendMessage(this, message);
 			}
 		} catch(IOException e) 
 		{
 			if(socket.isClosed())
+			{
 				System.out.println("Connection with client "+ getClientName() + " is closed.");
+
+			}
 			else
 			{
-				e.printStackTrace(); this.closeConnection();
+				e.printStackTrace(); 
+				this.closeConnection("failed to read message from client");
+			}
+			finally
+			{
+				ServerClass.removeClient(this);
 			}
 		}
 	}
 	
-	synchronized void closeConnection() 
+	synchronized void sendMessageToClient(String message)
 	{
 		try
 		{
+			if(!socket.isClosed())
+				messenger.print(message);
+			if(messenger.checkError())
+				this.closeConnection("unable to send message to client");
+		}
+	}
+
+	synchronized void closeConnection(String code) 
+	{
+		try
+		{
+			System.out.println("RunnableConnectionHandler is closing with code: '"+code+"'");
 				if (socket!=null && !socket.isClosed())	
 							socket.close();
 
@@ -66,7 +91,7 @@ class RunnableConnectionHandler implements Runnable
 		}
 	       	catch(IOException e) 
 		{
-			System.out.println("RunnableConnectionHandler closeConnection() exception"); 
+			System.out.println("RunnableConnectionHandler closeConnection() catched IOException"); 
 			e.printStackTrace();
 		}
 
