@@ -3,9 +3,9 @@ package server;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import utilities.UtilClass;
-
-class RunnableConnectionHandler implements Runnable
+import utilities.server.UtilClass;
+import utilities.server.UtilClientCommands;
+public class RunnableConnectionHandler implements Runnable
 {
 	Socket socket = null;
 	InputStream byteStream = null;
@@ -45,8 +45,14 @@ class RunnableConnectionHandler implements Runnable
 			String message;
 			while((message=textStream.readLine())!=null)
 			{		
-				System.out.println(getClientName() +": "+ message);
-				ServerClass.sendMessage(this, message);
+				//TODO parse message or command, if message serer.sendMessage, otherwise, command to static UtilClass.execCommand();
+				if(UtilClientCommands.isCommand(message))
+					UtilClientCommands.executeCommand(this, message);
+				else
+				{
+					System.out.println(getClientName() +": "+ message);
+					ServerClass.sendMessage(this, message);
+				}
 			}
 		} catch(IOException e) 
 		{
@@ -60,25 +66,23 @@ class RunnableConnectionHandler implements Runnable
 				e.printStackTrace(); 
 				this.closeConnection("failed to read message from client");
 			}
-			finally
-			{
-				ServerClass.removeClient(this);
-			}
+			
+		}
+		finally
+		{
+			ServerClass.removeClient(this);
 		}
 	}
 	
-	synchronized void sendMessageToClient(String message)
+	public synchronized void sendMessageToClient(String message)
 	{
-		try
-		{
 			if(!socket.isClosed())
-				messenger.print(message);
+				messenger.println(message);
 			if(messenger.checkError())
 				this.closeConnection("unable to send message to client");
-		}
 	}
 
-	synchronized void closeConnection(String code) 
+	public synchronized void closeConnection(String code) 
 	{
 		try
 		{

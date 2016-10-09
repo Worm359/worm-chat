@@ -3,14 +3,14 @@ package server;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import utilities.UtilClass;
+import utilities.server.*;
 
 public class ServerClass
 {
 	static ArrayList<RunnableConnectionHandler> connections = new ArrayList<RunnableConnectionHandler>();
 	static ServerSocket serverSocket = null;
 	public static boolean exitFlag = false;
-
+	private static StringQueue messagesQueue = new StringQueue("Welcome to WormChat!!!", 10);
 	public static void main(String [] args)
 	{
 		UtilClass utilities = new UtilClass();
@@ -18,9 +18,8 @@ public class ServerClass
         public void run() {
             try {
                 Thread.sleep(200);
-		utilities.stopServer("JVM shouting down...");
+		utilities.stopServer("JVM shutting down...");
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -47,6 +46,12 @@ public class ServerClass
 				RunnableConnectionHandler client = new RunnableConnectionHandler(clientSocket);
 				connections.add(client);
 				(new Thread(client)).start();
+				//send messages
+				for(StringIterator iter = messagesQueue.iterator(); iter.hasPrevious(); )
+				{
+					StringQueueElement singleMessage = iter.previous();
+					client.sendMessageToClient(singleMessage.getStr());
+				}	
 			}	
 		} 
 		
@@ -63,9 +68,10 @@ public class ServerClass
 		{
 			if(connectionIterator!=sender)
 			{
-				connectionIterator.sendMessageToClient(String message);
+				connectionIterator.sendMessageToClient(message);
 			}
 		}	
+		synchronized(messagesQueue) {messagesQueue.push(message);}
 	
 	}
 	static public void removeClient(RunnableConnectionHandler client)
@@ -83,16 +89,11 @@ public class ServerClass
 				}
 			}
 			catch(IOException e) {e.printStackTrace();}
-			try
+			//System.out.println("now Runnable closing");
+			for(RunnableConnectionHandler connectionIterator : connections)
 			{
-				//System.out.println("now Runnable closing");
-				for(RunnableConnectionHandler connectionIterator : connections)
-				{
-					System.out.println("RunnableConnectionHandler closing with name '"+connectionIterator.getClientName()+"'.");
-
-					connectionIterator.closeConnection();
-				}	
-			} 
+				connectionIterator.closeConnection("Server class is releasing RunnableConnectionHandler: '"+connectionIterator.getClientName()+"'");
+			}	
 			//catch(Exception e)
 			//{
 			//	e.printStackTrace();

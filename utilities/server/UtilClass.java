@@ -1,4 +1,4 @@
-package utilities;
+package utilities.server;
 import java.util.Scanner;
 //import java.util.PrintWriter;
 import server.ServerClass;
@@ -68,5 +68,22 @@ public class UtilClass implements Runnable
 		}
 		else {System.out.println("Server still getting comands to shut down with code: '"+code+"'");}
 	}
+
+/*	public static void isCommand(String mess)
+	{
+		return mess.startsWith("c: ");
+	}
+	public executeCommand(RunnableConnectionHandler client, String command)
+	{
+		switch(command.substring(3))
+		{
+			case "quit":
+			{
+
+				break;
+			}
+		}
+	}
+*/
 }
 
