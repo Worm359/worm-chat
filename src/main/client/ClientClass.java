@@ -11,6 +11,7 @@ class ConsoleException extends Exception
 		super(s);
 	}
 }
+//TODO initiate method in ClientClass and RCH
 public class ClientClass
 {
 
@@ -19,7 +20,17 @@ public class ClientClass
 	public boolean exitFlag = false;
 	public PrintWriter printer = null;
 	private String name;
+
+	private final static String DEFAULT_IP = "127.0.0.1";
+	private final static int DEFAULT_PORT = 1234;
+
+
 	public ClientClass() throws ConsoleException, IOException
+	{
+		this(DEFAULT_IP, DEFAULT_PORT);
+	}
+
+	public ClientClass(String ip, int port) throws ConsoleException, IOException
 	{	
 		try
 		{ 
@@ -29,7 +40,7 @@ public class ClientClass
 				throw (new ConsoleException("Error while creating console; WormClient cannot be started in this environment."));
 			}
 			name=console.readLine("Enter your name: ");
-			clientSocket = new Socket ("127.0.0.1", 1234);
+			clientSocket = new Socket (ip, port);
 			printer = new PrintWriter(clientSocket.getOutputStream());
 		}
 		catch(IOException e)
@@ -37,6 +48,9 @@ public class ClientClass
 			throw e;
 		}
 	}
+
+	
+
 	//comand!!! create a socket connection, with name.
 	//start a thread for sending messages.
 	//hear for messages in the current thread.
@@ -56,7 +70,6 @@ public class ClientClass
 			});*/
 		
 		//create vars for messages, client, receiver
-		String message = null;
 		ClientClass client = null;
 		RunnableClientReceiver receiver = null;
 		try
@@ -75,22 +88,32 @@ public class ClientClass
 			client.stopClient("Error while creating a socket or openning a stream.");
 			return;
 		}
+
 		(new Thread(receiver)).start();
 
-		//main loop on sending messegers to server
-		while(client.exitFlag!=true && ((message = client.console.readLine(client.name+": "))!=null))
-		{
-			if(client.exitFlag!=true)
-			{
-				if(UtilClientClass.isCommand(message))
-						UtilClientClass.execute(client, message);	
-				client.printer.print(message+"\n");
-				if(client.printer.checkError())
-				{
-					client.stopClient("error occured while printing to output stream in main loop");
-				}
-			}
+		client.initiate();
 
+		client.sendMessages();
+
+		//receiver.join();
+		System.out.println("Receiver thread has exited");
+	}
+
+	private void initiate()
+	{
+
+	}
+
+	private void sendMessages()
+	{
+		String message = null;
+		//main loop on sending messegers to server
+		while(exitFlag!=true && ((message = console.readLine(name+": "))!=null))
+		{
+			if(exitFlag!=true)
+			{
+				computeCommunication(message);
+			}
 		}
 	}
 
@@ -122,4 +145,16 @@ public class ClientClass
 			e.printStackTrace();
 		}	
 	}	
+
+	private void computeCommunication(String message)
+	{
+		printer.println(message);
+		if(UtilClientClass.isCommand(message))
+						UtilClientClass.execute(this, message);	
+		//print +"\n"
+		if(printer.checkError())
+		{
+			stopClient("error occured while printing to output stream in main loop");
+		}
+	}
 }

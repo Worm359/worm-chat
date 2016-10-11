@@ -11,11 +11,12 @@ public class UtilClientClass
 		String returnCode="default";
 		if(!command.startsWith(":c "))
 			throw new IllegalArgumentException("UtilClientClass: not a command");
+		//command = command.substring(3);
 		switch(command.substring(3))
 		{
 			case "quit":
 			{
-				client.printer.print(command);
+				//client.printer.println(command);
 				try
 				{
 					Thread.sleep(3000);

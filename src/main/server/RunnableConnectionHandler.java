@@ -3,10 +3,11 @@ package server;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import utilities.server.UtilClass;
+//import utilities.server.UtilClass;
 import utilities.server.UtilClientCommands;
 public class RunnableConnectionHandler implements Runnable
 {
+	public ServerClass server = null;
 	Socket socket = null;
 	InputStream byteStream = null;
 	InputStreamReader charStream = null;
@@ -19,8 +20,9 @@ public class RunnableConnectionHandler implements Runnable
 	OutputStream
 	*/
 	
-	public RunnableConnectionHandler(Socket socket) throws IOException
+	public RunnableConnectionHandler(ServerClass server, Socket socket) throws IOException
 	{
+		this.server = server;
 		this.socket = socket;
 		try
 		{
@@ -34,6 +36,7 @@ public class RunnableConnectionHandler implements Runnable
 			this.closeConnection("failed to create instance of RunnableConnectionHandler");
 			throw e;
 		}
+
 		
 	}
 		
@@ -45,13 +48,13 @@ public class RunnableConnectionHandler implements Runnable
 			String message;
 			while((message=textStream.readLine())!=null)
 			{		
-				//TODO parse message or command, if message serer.sendMessage, otherwise, command to static UtilClass.execCommand();
+//TODO parse message or command, if message serer.sendMessage, otherwise, command to static UtilClass.execCommand();
 				if(UtilClientCommands.isCommand(message))
 					UtilClientCommands.executeCommand(this, message);
 				else
 				{
 					System.out.println(getClientName() +": "+ message);
-					ServerClass.sendMessage(this, message);
+					server.sendMessage(this, message);
 				}
 			}
 		} catch(IOException e) 
@@ -70,10 +73,15 @@ public class RunnableConnectionHandler implements Runnable
 		}
 		finally
 		{
-			ServerClass.removeClient(this);
+			server.removeClient(this, "RCH thread with name '"+getClientName()+"' ends execution");
 		}
 	}
 	
+	public void beginCommunication()
+	{
+
+	}
+
 	public synchronized void sendMessageToClient(String message)
 	{
 			if(!socket.isClosed())

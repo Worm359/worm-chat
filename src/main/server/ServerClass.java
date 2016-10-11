@@ -11,31 +11,74 @@ public class ServerClass
 	static ServerSocket serverSocket = null;
 	public static boolean exitFlag = false;
 	private static StringQueue messagesQueue = new StringQueue("Welcome to WormChat!!!", 10);
+	public final int port;
+
+	public final static int DEFAULT_PORT=1234;
+
+	public ServerClass() throws IOException
+	{
+		this(DEFAULT_PORT);
+	}
+
+	public ServerClass(int port_arg) throws IOException
+	{
+		serverSocket = new ServerSocket(port_arg);
+		port = port_arg;
+	}
+
+	
+
 	public static void main(String [] args)
 	{
-		UtilClass utilities = new UtilClass();
+		
+/*
+		//JVM shutdown hook for resource releasing
 		Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
             try {
                 Thread.sleep(200);
-		utilities.stopServer("JVM shutting down...");
+				
+			UtilClass.stopServer("JVM shutting down...");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 		});
+*/
 		
-		(new Thread(utilities)).start();
 
-		/*
-		InputStream byteStream = null; */
+		UtilClass utilities = null;
+		ServerClass server = null;
+
 		try
 		{
-			serverSocket = new ServerSocket(1234);
+			//serverSocket = new ServerSocket(1234); MAY THROW EXCEPTION
+			server = new ServerClass();
+			
+			//class for serverside commands
+			utilities = new UtilClass(server);
+			//can input commands for serverside
+			(new Thread(utilities)).start();
+
 			Socket clientSocket = null;
-			while(!exitFlag)
+			
+			//MAY THROWS EXCEPTION
+			server.listenForClients(clientSocket);
+	
+		} 
+		catch (IOException e)
+		{
+			if(server!=null)
+				UtilClass.stopServer(server, "Server main method exception.");
+			e.printStackTrace();
+		}
+	}
+
+	private void listenForClients(Socket socketVar) throws IOException
+	{
+		while(!exitFlag)
 			{
-				clientSocket = serverSocket.accept();
+				socketVar = serverSocket.accept();
 				if(exitFlag==true)
 					{
 						releaseResourses();
@@ -43,26 +86,33 @@ public class ServerClass
 						break;
 					}
 
-				RunnableConnectionHandler client = new RunnableConnectionHandler(clientSocket);
-				connections.add(client);
-				(new Thread(client)).start();
-				//send messages
-				for(StringIterator iter = messagesQueue.iterator(); iter.hasPrevious(); )
-				{
-					StringQueueElement singleMessage = iter.previous();
-					client.sendMessageToClient(singleMessage.getStr());
-				}	
-			}	
-		} 
-		
-		catch (IOException e)
-		{
-			utilities.stopServer("Exception in ServerClass main loop!");
-			e.printStackTrace();
-		}
+				addClient(socketVar);
+				
+			}
 	}
+
+
+
+
+	private void addClient(Socket clientSocket) throws IOException
+	{
+		RunnableConnectionHandler client = new RunnableConnectionHandler(this, clientSocket);
+		(new Thread(client)).start();
+		client.beginCommunication();
+
+		connections.add(client);
+
+		//send messages
+		for(StringIterator iter = messagesQueue.iterator(); iter.hasPrevious(); )
+		{
+			StringQueueElement singleMessage = iter.previous();
+			client.sendMessageToClient(singleMessage.getStr());
+		}	
+	}
+
+
 	
-	static public void sendMessage(RunnableConnectionHandler sender, String message)
+	public void sendMessage(RunnableConnectionHandler sender, String message)
 	{
 		for(RunnableConnectionHandler connectionIterator : connections)
 		{
@@ -74,8 +124,10 @@ public class ServerClass
 		synchronized(messagesQueue) {messagesQueue.push(message);}
 	
 	}
-	static public void removeClient(RunnableConnectionHandler client)
+
+	static public void removeClient(RunnableConnectionHandler client, String code)
 	{
+		client.closeConnection(code);
 		connections.remove(client);
 	}
 

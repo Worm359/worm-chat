@@ -13,12 +13,14 @@ import java.net.UnknownHostException;
 public class UtilClass implements Runnable
 {
 	private Scanner keyboard;
+	private ServerClass server;
 	//private PrintWriter printer;
 	boolean exit = false;
 	
-	public UtilClass()
+	public UtilClass(ServerClass server)
 	{
 		//this.keyboard = new Scanner(in);
+		this.server = server;
 		this.keyboard = new Scanner(System.in);
 	}
 	
@@ -33,25 +35,23 @@ public class UtilClass implements Runnable
 				{
 					case "q":
 						{
-
-							stopServer("Command q received on server side");		
+							stopServer(server, "Command q received on server side");		
 							break MAIN_LOOP;
-
 						}
 				}
 			
 		}
 	}
 	
-	public static synchronized void stopServer(String code)
+	public static synchronized void stopServer(ServerClass serverObj, String code)
 	{
-		if(ServerClass.exitFlag != true)
+		if(serverObj.exitFlag != true)
 		{
 			System.out.println("Server is shutting down. Good bye! \n Server stopping with code: '"+code+"'");
-			ServerClass.exitFlag = true;	
+			serverObj.exitFlag = true;	
 			try
 			{
-				Socket s = new Socket("127.0.0.1", 1234);
+				Socket s = new Socket("127.0.0.1", serverObj.port);
 				//s.getOutputStream().write(END_WAITING);
 				//s.getOutputStream().flush();
 				s.close();
