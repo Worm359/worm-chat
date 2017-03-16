@@ -1,6 +1,6 @@
-package utilities.server;
-import server.RunnableConnectionHandler;
-import server.ServerClass;
+package server.commands;
+import server.RunnableClient;
+
 public class UtilClientCommands
 {
 	public static boolean isCommand(String mess)
@@ -8,7 +8,7 @@ public class UtilClientCommands
 		return mess.startsWith(":c ");
 	}
 
-	public static void executeCommand(RunnableConnectionHandler client, String command)
+	public static void executeCommand(ServerSideClientCommand command)
 	{
 		String answer;
 		String comm = command.substring(3);

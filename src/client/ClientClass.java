@@ -11,7 +11,6 @@ class ConsoleException extends Exception
 		super(s);
 	}
 }
-//TODO initiate method in ClientClass and RCH
 public class ClientClass
 {
 
@@ -56,19 +55,7 @@ public class ClientClass
 	//hear for messages in the current thread.
 	public static void main(String [] args)
 	{
-		/*
-		//Add JVM shutdown hook
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-			    try {
-				Thread.sleep(200);
-				client.stopServer("JVM shouting down...");
-			    } catch (InterruptedException e) {
-				e.printStackTrace();
-			    }
-			}
-			});*/
-		
+
 		//create vars for messages, client, receiver
 		ClientClass client = null;
 		RunnableClientReceiver receiver = null;
@@ -95,7 +82,6 @@ public class ClientClass
 
 		client.sendMessages();
 
-		//receiver.join();
 		System.out.println("Receiver thread has exited");
 	}
 
@@ -151,7 +137,6 @@ public class ClientClass
 		printer.println(message);
 		if(UtilClientClass.isCommand(message))
 						UtilClientClass.execute(this, message);	
-		//print +"\n"
 		if(printer.checkError())
 		{
 			stopClient("error occured while printing to output stream in main loop");

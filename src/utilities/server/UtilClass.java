@@ -1,6 +1,7 @@
 package utilities.server;
 import java.util.Scanner;
 //import java.util.PrintWriter;
+import common.Message;
 import server.ServerClass;
 import java.net.Socket;
 import java.io.IOException;
@@ -68,6 +69,9 @@ public class UtilClass implements Runnable
 		}
 		else {System.out.println("Server still getting comands to shut down with code: '"+code+"'");}
 	}
+
+    public static void print(Message message) {
+    }
 
 /*	public static void isCommand(String mess)
 	{
