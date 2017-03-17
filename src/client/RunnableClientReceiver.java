@@ -1,4 +1,7 @@
 package client;
+import common.Message;
+import utilities.client.UtilClientClass;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -27,7 +30,8 @@ public class RunnableClientReceiver implements Runnable
 		{
 			while((inputMessage=reader.readLine())!=null)
 			{
-				System.out.println(inputMessage);
+				Message message = new Message(inputMessage);
+				UtilClientClass.print(message);
 			}
 		}
 		catch(IOException e)

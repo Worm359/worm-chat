@@ -13,7 +13,7 @@ public class ServerClass
 	static ArrayList<RunnableClient> connections = new ArrayList<RunnableClient>();
 	static ServerSocket serverSocket = null;
 	public static boolean exitFlag = false;
-	private static MessageQueue messagesQueue = new MessageQueue("Welcome!", 10);
+	private static MessageQueue messagesQueue = new MessageQueue(new Message("Server", "Welcome!"), 10);
 	public final int port;
 
 	public final static int DEFAULT_PORT=1234;

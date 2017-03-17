@@ -3,6 +3,9 @@ import java.io.Console;
 import java.io.*;
 import java.io.IOException;
 import java.net.*;
+import java.util.Scanner;
+
+import common.Message;
 import utilities.client.UtilClientClass;
 class ConsoleException extends Exception
 {
@@ -14,7 +17,7 @@ class ConsoleException extends Exception
 public class ClientClass
 {
 
-	Console console;
+	Scanner console;
 	static private Socket clientSocket = null;
 	public boolean exitFlag = false;
 	public PrintWriter printer = null;
@@ -33,12 +36,13 @@ public class ClientClass
 	{	
 		try
 		{ 
-			console = System.console();
+			console = new Scanner(System.in);
 			if(console==null)
 			{
 				throw (new ConsoleException("Error while creating console; WormClient cannot be started in this environment."));
 			}
-			name=console.readLine("Enter your name: ");
+			System.out.print("Enter your name: ");
+			name=console.nextLine();
 			clientSocket = new Socket (ip, port);
 			printer = new PrintWriter(clientSocket.getOutputStream());
 		}
@@ -61,7 +65,8 @@ public class ClientClass
 		RunnableClientReceiver receiver = null;
 		try
 		{
-			client = new ClientClass();
+			if(args.length!=2) client = new ClientClass();
+			else client = new ClientClass(args[0], Integer.parseInt(args[1]));
 			receiver = new RunnableClientReceiver(client.clientSocket, client);
 		}
 		catch(ConsoleException e)
@@ -94,11 +99,12 @@ public class ClientClass
 	{
 		String message = null;
 		//main loop on sending messegers to server
-		while(exitFlag!=true && ((message = console.readLine(name+": "))!=null))
+		while(exitFlag!=true && ((message = console.nextLine())!=null))
 		{
 			if(exitFlag!=true)
 			{
-				computeCommunication(message);
+				Message mess = new Message(name, message);
+				computeCommunication(mess);
 			}
 		}
 	}
@@ -110,7 +116,6 @@ public class ClientClass
 			exitFlag=true;
 			System.out.println("WormClient is stopping; \n Shutting down command was called with code: '"+code+"'");
 			releaseClientResourses();
-
 		}
 		else
 		{
@@ -132,11 +137,12 @@ public class ClientClass
 		}	
 	}	
 
-	private void computeCommunication(String message)
+	private void computeCommunication(Message message)
 	{
-		printer.println(message);
-		if(UtilClientClass.isCommand(message))
-						UtilClientClass.execute(this, message);	
+		printer.println(message.toString());
+		/*if(message.isCommand()) {
+			UtilClientClass.execute(ClientSideCommandFabric.getClientSideCommand());
+		}*/
 		if(printer.checkError())
 		{
 			stopClient("error occured while printing to output stream in main loop");

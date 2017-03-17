@@ -1,11 +1,9 @@
 package utilities.client;
 import client.ClientClass;
+import common.Message;
+
 public class UtilClientClass
 {
-	public static boolean isCommand(String message)
-	{
-		return ((message.startsWith(":c ")));
-	}
 	public static String execute(ClientClass client, String command)
 	{
 		String returnCode="default";
@@ -30,5 +28,9 @@ public class UtilClientClass
 
 		}
 		return returnCode;
+	}
+
+	public static void print(Message message) {
+		System.out.println(message.getSender() + ": " + message.getMessageText());
 	}
 }

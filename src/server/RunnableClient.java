@@ -2,6 +2,8 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 //import utilities.server.UtilClass;
 import common.Message;
 import server.commands.ServerSideClientCommand;
@@ -11,12 +13,13 @@ import server.commands.UtilClientCommands;
 public class RunnableClient implements Runnable
 {
 	public ServerClass server = null;
-	Socket socket = null;
-	InputStream byteStream = null;
-	InputStreamReader charStream = null;
-	BufferedReader textStream = null;
-	PrintWriter messenger = null;
-	String clientName = null;
+	private Socket socket = null;
+	private InputStream byteStream = null;
+	private InputStreamReader charStream = null;
+	private BufferedReader textStream = null;
+	private PrintWriter messenger = null;
+	private String clientName = null;
+	private Map<String, String> messagesProperties = new HashMap<>();
 
 	public RunnableClient(ServerClass server, Socket socket) throws IOException
 	{
@@ -48,9 +51,16 @@ public class RunnableClient implements Runnable
 			while((inputFromClient=textStream.readLine())!=null)
 			{
 				message = new Message(inputFromClient);
-				if(message.isCommand())
-					UtilClientCommands.executeCommand(ServerSideClientCommandFabric.getCommand(this, message));
-				else
+				message.setSender(clientName);
+			    //message = new Message(clientName, inputFromClient);
+				/*if(!message.getCommandText().equals(clientName)) {
+					System.out.println("WARN: unsychronized client names on server-client sides");
+					message.setSender(clientName);
+				}*/
+				if(message.isCommand()) {
+                    sendMessageToClient(
+                            new Message("Server", ServerSideClientCommandFabric.getCommand(this, message).execute()));
+                } else
 				{
 					UtilClass.print(message);
 					server.sendMessage(this, message);
@@ -91,7 +101,6 @@ public class RunnableClient implements Runnable
 			System.out.println("RunnableConnectionHandler is closing with code: '"+code+"'");
 				if (socket!=null && !socket.isClosed())	
 							socket.close();
-
 		}
 	       	catch(IOException e) 
 		{

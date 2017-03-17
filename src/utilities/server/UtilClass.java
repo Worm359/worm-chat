@@ -71,6 +71,7 @@ public class UtilClass implements Runnable
 	}
 
     public static void print(Message message) {
+		System.out.println(message.getSender() + ": " + message.getMessageText());
     }
 
 /*	public static void isCommand(String mess)

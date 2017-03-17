@@ -13,8 +13,6 @@ public class MessageQueue {
     private MessageQueueElement bottomEl;
     private int filled;
 
-    public MessageQueue(String message, int size) {this(new Message((message)), size);}
-
     public MessageQueue(Message message, int size) {
         if((size<=2))
 			throw new IllegalArgumentException("There are at least 2 elements in Queue, also string must be not null.");
