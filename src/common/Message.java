@@ -13,6 +13,15 @@ public class Message {
     private String messageText;
     private String sender;
     private Map<String, String> properties = new HashMap<>();
+    /**
+     * todo toString must throw all the fields into string
+     *
+     * For now, it only pushes sender and text.
+     * After change will be done, to add new properties for a message:
+     * 1) Add to propAllowed
+     * 2) Add into toString()
+     *
+     */
     private static List<String> propAllowed = new ArrayList<>();
     static {
         propAllowed.add("sender");
@@ -33,14 +42,6 @@ public class Message {
         }
         messageText = properties.get("messageText");
         sender = properties.get("sender");
-        //message text
-        //sender
-    }
-
-    private void addProperty(String prop, String val) {
-        if(propAllowed.contains(prop))
-            properties.put(prop, val);
-        else System.out.println("WARN: unknown property in message.");
     }
 
     public Message(String sender, String messageText) {
@@ -48,29 +49,17 @@ public class Message {
         this.messageText = messageText;
     }
 
-
     public boolean isCommand() {
         return messageText.startsWith("/") && messageText.length()>1;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
 
-    public String getCommandText() {
-        if(!isCommand()) return null;
-        else {
-            if(messageText.contains(" "))
-                return messageText.substring(1, messageText.indexOf(" "));
-            else
-                return messageText.substring(1, messageText.length());
-        }
-    }
-
-    public String getMessageText() {
-        return this.messageText;
-    }
-
+    /**
+     * When a message is passed to a stream, toString method must correspond
+     * to #parseMethodFromStream(...)
+     * Also, client side must take care of escaping '~' symbol in messages
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder();
@@ -81,11 +70,38 @@ public class Message {
         return res.toString();
     }
 
+    public String getSender() {
+        return sender;
+    }
+
+    public String getCommandText() {
+        if(!isCommand()) return null;
+        else {
+            if(messageText.contains(" ")) // if there is arguments
+                return messageText.substring(1, messageText.indexOf(" "));
+            else
+                return messageText.substring(1, messageText.length());
+        }
+    }
+
+    public String getMessageText() {
+        return this.messageText;
+    }
+
     public void setSender(String sender) {
         this.sender = sender;
     }
 
-    public String getSender() {
-        return sender;
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    /**
+     * Map defines list of available properties: sender, color, importancy, etc.
+     */
+    private void addProperty(String prop, String val) {
+        if(propAllowed.contains(prop))
+            properties.put(prop, val);
+        else System.out.println("WARN: unknown property in message.");
     }
 }

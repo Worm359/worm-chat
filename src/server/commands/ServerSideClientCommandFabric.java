@@ -20,7 +20,7 @@ public  class ServerSideClientCommandFabric {
             command = new ServerSideClientCommand(client, message) {
                             @Override
                             protected String innerExecute() {
-                                return "Unknown command; list of available server commands:" + mapToString(commands);
+                                return "Unknown command; list of available server commands:\n" + mapToString(commands);
                             }
                         };
         } else {
@@ -31,6 +31,12 @@ public  class ServerSideClientCommandFabric {
         return command;
     }
 
+    /**
+     * Prototype realization.
+     * 1) Implement innerExecute, with possibility to use ServerSideClientCommand client reference.
+     * 2) Override regex if needed.
+     * 3) Set VALIDATION_ERROR_CODE if u have what to say.
+     */
     private static HashMap<String, ServerSideClientCommand> commands = new HashMap<>();
     static {
         ServerSideClientCommand setName = new ServerSideClientCommand(null, null) {
@@ -43,8 +49,9 @@ public  class ServerSideClientCommandFabric {
                 return answer;
             }
         };
-        setName.setVALIDATION_ERROR_CODE("Wrong command format. Should be: /setname #newName");
+        setName.setValidation_Error_Code("Wrong command format. Should be: /setname #newName");
         commands.put("setname", setName);
+
         commands.put("quit", new ServerSideClientCommand(null, null) {
             @Override
             protected String innerExecute() {

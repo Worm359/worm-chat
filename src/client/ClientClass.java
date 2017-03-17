@@ -103,7 +103,7 @@ public class ClientClass
 		{
 			if(exitFlag!=true)
 			{
-				Message mess = new Message(name, message);
+				Message mess = new Message(name, message.replaceAll("~", "<^-_-^>"));
 				computeCommunication(mess);
 			}
 		}

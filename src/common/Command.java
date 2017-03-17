@@ -28,6 +28,14 @@ public abstract class Command {
         if(message!=null) parseCommand();
     }
 
+    /**
+     * Fills fields:
+     *      command
+     *      arguments
+     * Shouldn't produce any exceptions.
+     * Used internally, environment should just call constructor with not null Message, or
+     * set it explicitly via setMessage(...)
+     */
     private void parseCommand() {
         String messageText = message.getMessageText();
         if(messageText==null || messageText.length()<=1 || !isValid()) {
@@ -44,6 +52,9 @@ public abstract class Command {
         }
     }
 
+    /**
+     * Used by a fabric realization, when message null throws RuntimeException
+     */
     public void setMessage(Message message) {
         if(message==null) throw new RuntimeException("Setting null message for command");
         else {
@@ -59,7 +70,8 @@ public abstract class Command {
     }
 
     protected boolean isValid() {
-            return message.getMessageText().matches(regex);
+        if(message==null) return false;
+        return message.getMessageText().matches(regex);
     }
 
     /**
@@ -76,8 +88,8 @@ public abstract class Command {
     }
 
     /**
-     * Concreate job, done by command.
-     * @return
+     * Actual job, done by command.
+     * @return ---> execute() ----> returns answer to command execution.
      */
     protected abstract String innerExecute();
 
@@ -95,7 +107,9 @@ public abstract class Command {
             throw new RuntimeException("Some shit with ServerSideClientCommand cloning...");
         }
     }
-
+     /*
+     * For deep cloning
+     */
     private void clearArgs() {
         this.arguments = new ArrayList<>();
     }
@@ -104,7 +118,10 @@ public abstract class Command {
         return message.getCommandText();
     }
 
-    public void setVALIDATION_ERROR_CODE(String VALIDATION_ERROR_CODE) {
+    /**
+     * So that execute returns readable code
+     */
+    public void setValidation_Error_Code(String VALIDATION_ERROR_CODE) {
         this.VALIDATION_ERROR_CODE = VALIDATION_ERROR_CODE;
     }
 }
