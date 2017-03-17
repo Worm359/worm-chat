@@ -107,9 +107,9 @@ public abstract class Command {
             throw new RuntimeException("Some shit with ServerSideClientCommand cloning...");
         }
     }
-     /*
-     * For deep cloning
-     */
+    /*
+    * For deep cloning
+    */
     private void clearArgs() {
         this.arguments = new ArrayList<>();
     }

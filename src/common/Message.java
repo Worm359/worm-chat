@@ -8,27 +8,33 @@ import java.util.Map;
 /**
  * Created by ialbert on 16.03.2017.
  */
+
+/**
+ * To send a message:
+ * 1) message("Name", "text");
+ * 2) addProperty(...) - color, level, smth else
+ * 3) send message.toString()
+ *
+ * To receive a message:
+ * 1) message(fromStream) (fromStream must be not null)
+ * 2) possible irrelevant condition: if message isn't formatted "key1=value1~key2=value2..."
+ *    in that case:
+ *          messageText = null
+ *          sender = null
+ *    plus
+ */
 public class Message {
 
     private String messageText;
     private String sender;
-    private Map<String, String> properties = new HashMap<>();
     /**
-     * todo toString must throw all the fields into string
-     *
-     * For now, it only pushes sender and text.
-     * After change will be done, to add new properties for a message:
-     * 1) Add to propAllowed
-     * 2) Add into toString()
-     *
+     * Object, which creates message, is responsible for adding properties.
      */
-    private static List<String> propAllowed = new ArrayList<>();
-    static {
-        propAllowed.add("sender");
-        propAllowed.add("color");
-        propAllowed.add("messageText");
-    }
+    private Map<String, String> properties = new HashMap<>();
 
+    /**
+     * @param fromStream - must be not null
+     */
     public Message(String fromStream) {
         parseMessageFromStream(fromStream);
     }
@@ -36,9 +42,12 @@ public class Message {
     private void parseMessageFromStream(String fromStream) {
         String[] parts = fromStream.split("~");
         for(String part : parts) {
-            String prop = part.substring(0, part.indexOf('='));
-            String val = part.substring(part.indexOf('=')+1, part.length());
-            addProperty(prop, val);
+            int equalPos = part.indexOf('=');
+            if(equalPos < part.length()-1 && equalPos>0) {
+                String prop = part.substring(0, equalPos);
+                String val = part.substring(equalPos+1, part.length());
+                addProperty(prop, val);
+            }
         }
         messageText = properties.get("messageText");
         sender = properties.get("sender");
@@ -92,16 +101,10 @@ public class Message {
         this.sender = sender;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
     /**
      * Map defines list of available properties: sender, color, importancy, etc.
      */
-    private void addProperty(String prop, String val) {
-        if(propAllowed.contains(prop))
-            properties.put(prop, val);
-        else System.out.println("WARN: unknown property in message.");
+    public void addProperty(String prop, String val) {
+        properties.put(prop, val);
     }
 }
